@@ -1,0 +1,217 @@
+
+
+## Test a Perceptual Phenomenon - Stroop Effect
+##### by Shaswati Ghosh, January 26, 2018  
+
+#### **Introduction**
+
+The Stroop effect is named after American psychologist, John Ridley Stroop. This is a psychological occurrence which demonstrate interference in the reaction time of a task.The participant's task is to say out loud the color of the ink in which the word is printed. 
+
+The task has two conditions: a congruent words condition, and an incongruent words condition. In the congruent words condition, the words being displayed are color words whose names match the colors in which they are printed: for example <span style="color:red">RED</span>, <span style="color:blue">BLUE</span>. In the incongruent words condition, the name of a color (e.g., <span style="color:red">BLUE</span>, <span style="color:blue">GREEN</span>, or <span style="color:green">RED</span>) is printed in a color not denoted by the name (e.g., the word "red" printed in green ink instead of red ink).  
+
+It is expected that during incongruent condition, naming the color of the word takes longer and is more prone to errors than when the color of the ink matches the name of the color.To clarify, I'm going to analyse the proposed data set, which contains repeated measures of the participant's performance on the congruent and incongruent task. In each case, we measure the time it takes to name the ink colors in equally-sized lists. Each participant will go through and record a time from each condition.
+
+#### **1. What is our independent variable? What is our dependent variable?**
+
+**Independent variable**: Independent variable defines the variable that is changed or controlled in experiment. In stroop effect test, it is the way the text is displayed i.e. words conditions(congruent words or incongruent words).  
+
+**Dependent variable**: This is the variable which is tested in an experiment. Here it is the time it takes to name the ink colors in equally-sized lists. Time is measured in seconds.
+
+
+#### **2. What is an appropriate set of hypotheses for this task? What kind of statistical test do you expect to perform? Justify your choices.**
+
+The data is a sample from a population and we are trying to infer about the population. The sample is of n=24 with the recognition times of congruent and incongruent data. 
+For this data set, null hypotheses should be that, there is no change in mean reading times in both cases or the mean time for colour recognition for congruent words is greater than the mean time for incongruent words. Alternative hypotheses should be that, there is an increase in mean reading times when the colors are incongruent.
+
+*The null hypothesis ($H_{0}$)*: 
+
+$H_{0}$:$\mu_{C} \ge \mu_{I}$, the difference of mean time duration of population during congruent and incongruent tests would equal 0 or be greater than 0, i.e. the mean incongruent times of population would be less or equal to the congruent times for the population.
+
+*The alternative hypothesis ($H_{A}$)*:
+  
+$H_{A}$: $\mu_{C}$ < $\mu_{I}$, the difference of mean time duration of population during the congruent and incongruent tests would be less than 0, i.e. the incongruent times would be greater than the congruent test times for the population.
+
+$\mu_{C}$ = the mean of population reaction time for congruent condition,  
+$\mu_{I}$ = the mean of population reaction time for incongruent condition
+
+
+We don't know the total population variance in this case, however we have detailed data on a sampled group for both the congruent and incongruent tests. Moreover sample size is 24, which is less than 30.
+All these conditions indicate that we should use 'T-test' as statistical test for this Stroop experiment sample data set.
+According to statistics, when sample size is less than 30, T-test is more appropriate. 
+
+In given scenario it appears that reading tests are performed on the same set of people for two different conditions. As same set of people were tested at two different point of time, we should perform a **dependent** t-test for **paired** samples. Assumptions made for a dependent t-test for paired samples are:
+
+  * The sample of differences should be roughly normal.  
+  * Samples should be dependent and it should be possible to pair them.  
+  * The obvious requirement that both samples should be of equal size.
+
+#### **3. Report some descriptive statistics regarding this dataset. Include at least one measure of central tendency and at least one measure of variability.**  
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(ggplot2)
+library(gridExtra) 
+library(tidyr)
+library(dplyr)
+library(reshape2)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+setwd("C:/Udacity/Nano degree/Core Curricular 8_Inferential Statistics/Project")
+stroop.data <- read.csv("stroopdata.csv")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+stroop.set <- stroop.data
+stroop.set$Difference <- (stroop.set$Congruent - stroop.set$Incongruent)
+```
+
+**Central Tendency:**  
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+stroop.summary <- summary(stroop.set)
+stroop.summary
+```
+
+This table shows the minimum, maximum, mean and median for response time of both condition.
+We also have the mean, median for samples of difference of response time(Congruent - Incongruent).
+
+**Measures of Variability:**
+
+We already have the value of 1st quartile and 3rd quartile value in the above table. IQR value for both the condition is as below.
+
+IQR for Congruent sample:
+```{r echo=FALSE}
+IQR.c <- (16.20 - 11.90)
+IQR.c
+```
+
+IQR for Incongruent sample:  
+```{r echo=FALSE}
+IQR.ic <- (24.05 - 18.72)
+IQR.ic
+```
+
+Standard Deviation for Congruent Sample:  
+
+```{r echo=FALSE}
+sd(stroop.set[["Congruent"]])
+```
+  
+Standard Deviation for Incongruent Sample:  
+```{r echo=FALSE}
+sd(stroop.set[["Incongruent"]])
+```
+
+Standard deviation of the time difference ibetween the two task conditions:
+
+```{r echo=FALSE}
+sd(stroop.set[["Difference"]])
+```
+
+
+#### **4. Provide one or two visualizations that show the distribution of the sample data. Write one or two sentences noting what you observe about the plot or plots.**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# Add a column identifying subjects
+stroop.mutate <- stroop.data
+stroop.mutate$subject <- mutate(stroop.mutate, subject = 1:nrow(stroop.mutate))
+# Tidy up data by keeping one variable in one column
+tidy.dat <- gather(stroop.mutate$subject, congruency, time, -subject)
+```
+
+The distribution of the sample data has been visualized with box plot and histogram as below.  
+
+```{r echo=FALSE, fig.height=4, fig.width=12, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+b <- ggplot(tidy.dat, aes(y = time, x = congruency, fill = congruency))
+
+b1 <-  b + geom_boxplot() +
+     ggtitle("Reaction Time of Task")+
+     ylab("Response Time(Seconds)")+
+     xlab("Stroop Task Condition")
+ 
+h <- ggplot(tidy.dat, aes(x = time, fill = congruency))
+ 
+h1 <- h + geom_histogram(position = "dodge") +
+    ggtitle("Histogram for Response Time(Seconds)")+
+    labs(y = "Frequency", x = "Response Time(Seconds)")
+
+grid.arrange(b1, h1, ncol = 2)
+
+```
+
+The boxplots clearly show that the two groups have significant difference in median times. There ranges are also different with 'Incongruent' words group having linger time. This is in line with the details we found in above statistic table. The histograms also confirm this observation. It also shows that 'Incongruent' group has evident outliers. The distribution of the Incongruent group is likely to be positively skewed due to two outliners.
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+stroop.test <- stroop.data
+#Adding a new categorical parameter 'Participant' to have the comparison histogram
+stroop.test$participent <- factor(c(1: nrow(stroop.data)))
+#Reshapeing it to get all the time values in one column with corresponding congruence condition in #another column
+stroop.test <- melt(stroop.test)
+#Renaming the autonamed 'value' column to 'time'
+names(stroop.test)[3] <- "time"
+
+h2 <- ggplot(stroop.test, aes(x = participent, y = time, fill = variable)) +
+  ggtitle("Response time comparison for each participant on both condition")+
+  labs(x = "Participant", y = "Response Time(Seconds)")+
+  geom_bar(stat = 'identity', position = "dodge")
+
+p1 <- ggplot(stroop.set, aes(x = stroop.set$Difference)) +
+        geom_density(fill = "orange", colour = "black")+
+        scale_x_continuous(   breaks = seq(-30, 10, 5),
+                              limits=c(-30, 10))+
+        ggtitle("Density of Difference in Response Time")+
+        labs(x = "Time Difference (Congruent - Incongruent) in Seconds", y = "Density")
+ 
+grid.arrange(p1, h2, nrow = 2)
+```
+
+The distribution of the difference in response time of two conditions can be visualized with the Density Plot as shown above. Most of the values (Difference in response time) that fall under the curve on the x-axis are negative, which indicates that it is very likely that the response time of with incongruent words condition is longer than that of the congruent words condition. The second plot shows the compared value of each participant and defines the same expectation.
+
+
+#### **5. Now, perform the statistical test and report your results. What is your confidence level and your critical statistic value? Do you reject the null hypothesis or fail to reject it? Come to a conclusion in terms of the experiment task. Did the results match up with your expectations?**
+
+
+Our Alternatione Hypothesis is that, two groups have significant difference in their mean times.  
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+t.test(x=stroop.data$Congruent, y=stroop.data$Incongruent, 
+       alternative = "two.sided", mu = 0, paired = TRUE
+       , conf.level = 0.95)
+```
+
+##### Critical value with $\alpha$ = 0.05  
+
+```{r}
+qt(0.05,23)
+```
+
+As shown by the R output above, the result is as below:
+
+t(24) = -8.02,  
+
+p-value = .00000004103<.00001 
+
+95% CI (5.91, 10.019)
+
+At 95% confidence level($\alpha$ = 0.05), critical statistic value of 't' is -1.71. And our result shows the value as -8.02, which is far negative from the critical value, which indicates the average time for incongrunce test can never be less than that of congruence condition. Along with this, p value is lass than 0.0001.   
+Based on this t-statistics and p-value we can reject the null hypothesis($H_{0}$) in favor of the alternative hypothesis($H_{A}$) and conclude that the time difference between congruence and incongruence group is statistically significant. That is stroop effect is present. This is according to our expectation as my own test result of stroop effect match with the result. 
+As per confidence intervals, we're 95% confident that the true difference between the incongruence and congruence group average times is between 5.910555 and 10.019028.
+
+
+#### **6. Optional: What do you think is responsible for the effects observed? Can you think of an alternative or similar task that would result in a similar effect? Some research about the problem will be helpful for thinking about these two questions!**
+
+Human tends to read words faster than identifying the color of the printed word. Therefore, whenever a word is present, our eyes and brain will automatically capture and deciper them, which leads to a delay and a interference with the color recognition. If we simply show the same color of 'incongruent' condition in a simple circle rather than a word, participant will speak out the color much faster than this incongruent word condition.
+This type of effect can be expected when we print out animals and display a name of a different animal at the same time. Or exchange the size of animals and ask participant to say their size. Example, if elephant is printed in a small size and rabit in a bigger size, if will take time to say small and big appropriate for those animals.  
+
+
+#### *Reference*
+
+  * 1.https://en.wikipedia.org/wiki/Stroop_effect
+  * 2.https://en.wikipedia.org/wiki/Student%27s_t-test
+  * 3.http://support.minitab.com/en-us/minitab/17/topic-library/basic-statistics-and-graphs/introductory-concepts/basic-concepts/descriptive-inferential-stats/
+  * 4.https://stackoverflow.com/questions/25070547/ggplot-side-by-side-geom-bar
+  
