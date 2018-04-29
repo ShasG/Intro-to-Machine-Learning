@@ -1,4 +1,3 @@
-
 This folder is containing analysis of 2 dataset.
 1. Bay Area Bike Share Dataset
    Finding the pattern of its use and proposing an idea about the location for new center which can lead to expansion of their business
